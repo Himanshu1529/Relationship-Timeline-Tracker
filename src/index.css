@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  background-color: black;
+}
+.glow-text {
+  text-shadow: 0 0 5px rgba(255, 105, 180, 0.8),
+    0 0 10px rgba(255, 105, 180, 0.6), 0 0 15px rgba(255, 105, 180, 0.4);
+}
+
+select,
+input,
+textarea {
+  background-color: transparent; /* Transparent background for input and textarea */
+  color: white; /* White text */
+}
+
+button:disabled {
+  background-color: gray; /* Gray color when disabled */
+}
+
+.custom-select option {
+  color: black; /* Text color for options */
+}
