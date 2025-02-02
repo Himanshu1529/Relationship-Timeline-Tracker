@@ -1,4 +1,3 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import { db } from "../config/FirebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -8,7 +7,7 @@ import {
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
-import { FaHeart, FaHandshake } from "react-icons/fa"; // Love and Friendship Icons
+import { FaHeart, FaHandshake, FaShareAlt } from "react-icons/fa"; // Love, Friendship & Share Icons
 
 const Timeline = () => {
   const [moments, setMoments] = useState([]);
@@ -16,46 +15,82 @@ const Timeline = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (user) {
+      if (user?.primaryEmailAddress?.emailAddress) {
         try {
-          // Query Firestore to get the moments where the email matches the logged-in user's email
           const q = query(
             collection(db, "moments"),
-            where("email", "==", user.primaryEmailAddress?.emailAddress)
+            where("email", "==", user.primaryEmailAddress.emailAddress)
           );
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
-            // Map through the documents and extract data for each moment
             const momentsData = querySnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
             setMoments(
               momentsData.sort(
-                (a, b) => b.timestamp.seconds - a.timestamp.seconds
+                (a, b) =>
+                  (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)
               )
-            ); // Sort by timestamp (newest first)
+            );
           } else {
-            console.log("No moments found for the logged-in user.");
-            setMoments([]); // Ensure moments are set to an empty array if none are found
+            setMoments([]);
           }
         } catch (error) {
           console.error("Error fetching user data: ", error);
         }
-      } else {
-        console.log("No user is logged in.");
       }
     };
 
-    fetchUserData(); // Call the function to fetch user data
-  }, [user]); // Dependency on `user` ensures it re-runs when the user logs in
+    fetchUserData();
+  }, [user]);
+
+  // Function to share the entire timeline
+  // Function to share the entire timeline with a website link
+  const handleShareAll = () => {
+    if (moments.length === 0) {
+      alert("No moments to share!");
+      return;
+    }
+
+    // Your website link
+    const websiteLink = "https://relationship-timeline-tracker.vercel.app"; // Replace with your actual website link
+
+    // Format all moments as a single shareable message
+    const shareText =
+      "🌟 My Special Moments 🌟\n\n" +
+      moments
+        .map(
+          (moment, index) =>
+            `#${index + 1} - ${moment.friend}\n📅 ${new Date(
+              moment.timestamp?.seconds * 1000
+            ).toLocaleString()}\n💬 "${moment.text}"\n`
+        )
+        .join("\n") +
+      `\n\n✨ View more on my timeline: ${websiteLink} ❤️`;
+
+    // WhatsApp share link
+    const whatsappLink = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+    // Snapchat share link
+    const snapchatLink = `https://www.snapchat.com/share?text=${encodeURIComponent(
+      shareText
+    )}`;
+
+    // Open WhatsApp
+    window.open(whatsappLink, "_blank");
+
+    // Open Snapchat
+    window.open(snapchatLink, "_blank");
+  };
 
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4 text-center text-pink-600">
-        Timeline
+        Favourite Moment Timeline
       </h2>
+
       {moments.length === 0 ? (
         <div className="text-center">
           <p className="text-lg mb-4">You have no moments yet. Add one!</p>
@@ -66,38 +101,52 @@ const Timeline = () => {
           </a>
         </div>
       ) : (
-        <VerticalTimeline>
-          {moments.map((moment) => (
-            <VerticalTimelineElement
-              key={moment.id}
-              className="vertical-timeline-element--work"
-              contentStyle={{
-                background: "rgba(255, 182, 193, 0.7)", // Soft pink background
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                borderRadius: "10px",
-                color: "#fff",
-              }}
-              contentArrowStyle={{
-                borderRight: "7px solid rgba(255, 182, 193, 0.7)",
-              }}
-              iconStyle={{ background: "#FF69B4", color: "#fff" }} // Love/friendship pink color
-              icon={moment.type === "love" ? <FaHeart /> : <FaHandshake />} // Conditional icon based on type
+        <>
+          {/* Share All Button */}
+          <div className="text-center mb-4">
+            <button
+              onClick={handleShareAll}
+              className="px-4 py-2 bg-pink-500 text-white rounded-md flex items-center mx-auto space-x-2"
             >
-              <h3 className="vertical-timeline-element-title font-bold text-white">
-                {moment.friend}
-              </h3>
-              <small>
-                {new Date(moment.timestamp.seconds * 1000).toLocaleString()}
-              </small>
-              <p className="text-white">{moment.text}</p>
-            </VerticalTimelineElement>
-          ))}
-          <VerticalTimelineElement
-            iconStyle={{ background: "#FF69B4", color: "#fff" }}
-            icon={<FaHeart />} // Default love icon for the end element
-          />
-        </VerticalTimeline>
+              <FaShareAlt /> <span>Share All Moments</span>
+            </button>
+          </div>
+
+          <VerticalTimeline>
+            {moments.map((moment) => (
+              <VerticalTimelineElement
+                key={moment.id}
+                className="vertical-timeline-element--work"
+                contentStyle={{
+                  background: "rgba(255, 182, 193, 0.7)",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                  borderRadius: "10px",
+                  color: "#fff",
+                }}
+                contentArrowStyle={{
+                  borderRight: "7px solid rgba(255, 182, 193, 0.7)",
+                }}
+                iconStyle={{ background: "#FF69B4", color: "#fff" }}
+                icon={moment.type === "love" ? <FaHeart /> : <FaHandshake />}
+              >
+                <h3 className="vertical-timeline-element-title font-bold text-white">
+                  {moment.friend}
+                </h3>
+                <small>
+                  {moment.timestamp?.seconds
+                    ? new Date(moment.timestamp.seconds * 1000).toLocaleString()
+                    : "Unknown Date"}
+                </small>
+                <p className="text-white">{moment.text}</p>
+              </VerticalTimelineElement>
+            ))}
+            <VerticalTimelineElement
+              iconStyle={{ background: "#FF69B4", color: "#fff" }}
+              icon={<FaHeart />}
+            />
+          </VerticalTimeline>
+        </>
       )}
     </div>
   );
