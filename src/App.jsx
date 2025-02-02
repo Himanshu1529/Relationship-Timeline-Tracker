@@ -12,7 +12,7 @@ const Main = () => (
       <h1 className="text-center text-2xl text-white glow-text">
         Welcome to Relationship Timeline
       </h1>
-      <a href="./add-moment">
+      <a href="/add-moment">
         <button className="mt-4 px-6 py-2 text-white outline rounded-md hover:bg-pink-700 hover:outline-pink-700">
           Get Started
         </button>
