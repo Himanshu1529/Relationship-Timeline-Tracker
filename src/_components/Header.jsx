@@ -68,10 +68,8 @@ function Header() {
             <div className="flex flex-col px-6 py-4 space-y-2">
               {[
                 { name: "Home", path: "/" },
-                { name: "Features", path: "/features" },
-                { name: "Solutions", path: "/solutions" },
-                { name: "Resources", path: "/resources" },
-                { name: "Pricing", path: "/pricing" },
+                { name: "Add Moment", path: "/add-moment" },
+                { name: "View Timeline", path: "/relationship-timeline" },
               ].map((item) => (
                 <NavLink
                   key={item.name}
@@ -89,7 +87,7 @@ function Header() {
                 </NavLink>
               ))}
 
-              <div className="mt-4 bg-transparent text-white">
+              <div className="mt-4 bg-transparent text-black">
                 <SignedOut>
                   <SignInButton />
                 </SignedOut>
